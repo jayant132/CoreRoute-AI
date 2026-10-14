@@ -24,7 +24,7 @@ func main() {
 	}
 
 	// 1. Initialize our In-Memory Semantic Cache
-	semanticCache := cache.NewNewSemanticCache() // Wait, let's match the function name from semantic_cache.go (NewSemanticCache)
+	semanticCache := cache.NewSemanticCache() // Wait, let's match the function name from semantic_cache.go (NewSemanticCache)
 	// Let's make sure it calls cache.NewSemanticCache()
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -36,8 +36,7 @@ func main() {
 	// 2. Initialize Resilient Proxy with Cache dependency injected
 	resilientProxy := proxy.NewResilientProxy(ollamaURL, groqAPIKey, semanticCache)
 
-	http.Handle("/v1/", http.StripPrefix("/v1", resilientProxy))
-
+		http.Handle("/v1/", resilientProxy)
 	port := ":8080"
 	fmt.Printf("🚀 CoreRoute-AI Gateway starting on port %s...\n", port)
 	fmt.Printf("⚡ Semantic Caching & Resilience Engine Active\n")

@@ -28,9 +28,7 @@ func NewSemanticCache() *SemanticCache {
 
 // hashPrompt normalizes a prompt string and generates a secure hash key
 func hashPrompt(prompt string) string {
-	// Normalize: lowercase and trim whitespace to catch minor phrasing variations
 	cleaned := strings.ToLower(strings.TrimSpace(prompt))
-	
 	hash := sha256.Sum256([]byte(cleaned))
 	return hex.EncodeToString(hash[:])
 }
@@ -39,7 +37,7 @@ func hashPrompt(prompt string) string {
 func (c *SemanticCache) Get(prompt string) (string, bool) {
 	key := hashPrompt(prompt)
 
-	c.mu.RLock // Acquire Read Lock (allows multiple simultaneous readers)
+	c.mu.RLock() // <-- FIXED: Added parentheses here!
 	defer c.mu.RUnlock()
 
 	item, found := c.items[key]
@@ -47,7 +45,7 @@ func (c *SemanticCache) Get(prompt string) (string, bool) {
 		return "", false
 	}
 
-	// Optional: Expiration policy (e.g., items expire after 1 hour)
+	// Items expire after 1 hour
 	if time.Since(item.Timestamp) > 1*time.Hour {
 		return "", false
 	}
@@ -59,7 +57,7 @@ func (c *SemanticCache) Get(prompt string) (string, bool) {
 func (c *SemanticCache) Set(prompt string, response string) {
 	key := hashPrompt(prompt)
 
-	c.mu.Lock() // Acquire Write Lock (blocks readers/writers for safe writing)
+	c.mu.Lock() 
 	defer c.mu.Unlock()
 
 	c.items[key] = CacheItem{
